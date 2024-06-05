@@ -12,6 +12,8 @@ Poniższe zadania będą się sprowadzały do modyfikacji bazowego kodu. Proces 
 //Commit6_1. Na podstawie analogii do wyjątku WrongStudentName utwórz i obsłuż wyjątki WrongAge oraz WrongDateOfBirth. 
 //Niepoprawny wiek – gdy jest mniejszy od 0 lub większy niż 100. Niepoprawna data urodzenia – gdy nie jest zapisana w formacie DD-MM-YYYY, np. 28-02-2023.
 
+//Commit6_2. Sprawdzanie czy data urodzenia zawiera się w AA-BB-CCCC (dzień 1-31, miesiąc 1-12, rok 1900-2024)
+
 import java.io.IOException;
 import java.util.Scanner;
 import java.io.IOException;
@@ -19,6 +21,7 @@ import java.io.IOException;
 class WrongStudentName extends Exception { }
 class WrongAge extends Exception { }
 class WrongDateOfBirth extends Exception { }
+class WrongDateFormat extends Exception { }
 
 class Main {
     public static Scanner scan = new Scanner(System.in);
@@ -35,12 +38,18 @@ class Main {
                 }
             } catch(IOException e) {
 
-            } catch(WrongStudentName e) {
+            } catch(WrongStudentName e) 
+                {
                 System.out.println("Błędne imie studenta!");
-            } catch(WrongAge e) {
+            } catch(WrongAge e) 
+                {
                 System.out.println("Błędny wiek!");
-            } catch(WrongDateOfBirth e) {
+            } catch(WrongDateOfBirth e) 
+                {
                 System.out.println("Błędna data urodzenia!");
+            } catch(WrongDateFormat e) 
+                {
+                System.out.println("Błędny format daty! Sprawdź czy na pewno dzień zawiera się w 1-31, miesiąc w 1-12, rok w 1900-2024");
             }
         }
     }
@@ -63,7 +72,41 @@ class Main {
 
         return name;
     }
+    public static String ReadDate() throws WrongDateOfBirth, WrongDateFormat {
+        scan.nextLine();
+        System.out.println("Podaj datę urodzenia DD-MM-YYY");
+        var date = scan.nextLine();
+        if (!date.matches("\\d{2}-\\d{2}-\\d{4}")) {
+            throw new WrongDateOfBirth();
+        }
+        String[] parts = date.split("-");
+        int day = Integer.parseInt(parts[0]);
+        int month = Integer.parseInt(parts[1]);
+        int year = Integer.parseInt(parts[2]);
 
+        // Sprawdzenie poprawności roku
+        if (year < 1900 || year > 2024) {
+            throw new WrongDateFormat();
+        }
+
+        // Sprawdzenie poprawności miesiąca
+        if (month < 1 || month > 12) {
+            throw new WrongDateFormat();
+        }
+
+        // Sprawdzenie poprawności dnia w zależności od miesiąca
+        if (day < 1 || day > 31) {
+            throw new WrongDateFormat();
+        }
+        if (month == 2 && day > 29) {
+            throw new WrongDateFormat();
+        }
+        if ((month == 4 || month == 6 || month == 9 || month == 11) && day > 30) {
+            throw new WrongDateFormat();
+        }
+
+        return date;
+    }
     public static int ReadAge() throws WrongAge {
         System.out.println("Podaj wiek: ");
         var age = scan.nextInt();
@@ -72,20 +115,29 @@ class Main {
         return age;
     }
 
-    public static String ReadDate() throws WrongDateOfBirth {
+    public static String SprawdzDate() throws WrongDateOfBirth, WrongDateFormat {
         scan.nextLine();
         System.out.println("Podaj datę urodzenia DD-MM-YYY");
         var date = scan.nextLine();
         if (!date.matches("\\d{2}-\\d{2}-\\d{4}")) {
             throw new WrongDateOfBirth();
         }
+
+        String[] parts = date.split("-");
+        int day = Integer.parseInt(parts[0]);
+        int month = Integer.parseInt(parts[1]);
+        int year = Integer.parseInt(parts[2]);
+
+        if (year < 1900 || year > 2024 || month < 1 || month > 12 || day < 1 || day > 31) {
+            throw new WrongDateFormat();
+        }
         return date;
     }
 
-    public static void exercise1() throws IOException, WrongStudentName, WrongAge, WrongDateOfBirth {
+    public static void exercise1() throws IOException, WrongStudentName, WrongAge, WrongDateOfBirth, WrongDateFormat {
         var name = ReadName();
         var age = ReadAge();
-        var date = ReadDate();
+        var date = SprawdzDate();
         (new Service()).addStudent(new Student(name, age, date));
     }
 
