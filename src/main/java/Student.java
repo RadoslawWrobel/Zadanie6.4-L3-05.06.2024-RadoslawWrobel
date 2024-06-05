@@ -1,27 +1,29 @@
 public class Student {
 
-    private String Name;
-    private int Age;
-    private String Date;
+    private String name;
+    private int age;
+    private String date;
 
     public Student(String name, int age, String date) {
-        Name = name;
-        Age = age;
-        Date = date;
+        this.name = name;
+        this.age = age;
+        this.date = date;
     }
 
-    public String GetName() {return Name;}
-    public int GetAge() {return Age;}
-    public String GetDate() {return Date;}
+    public String getName() { return name; }
+    public int getAge() { return age; }
+    public String getDate() { return date; }
 
-    public String ToString() {
-        return Name + " " + Integer.toString(Age) + " " + Date;
+    @Override
+    public String toString() {
+        return name + " " + age + " " + date;
     }
 
-    public static Student Parse(String str) {
+    public static Student parse(String str) {
         String[] data = str.split(" ");
-        if(data.length != 3)
-            return new Student("Parse Error", -1, "");
+        if(data.length != 3) {
+            throw new IllegalArgumentException("Invalid input format for student data.");
+        }
         return new Student(data[0], Integer.parseInt(data[1]), data[2]);
     }
 }

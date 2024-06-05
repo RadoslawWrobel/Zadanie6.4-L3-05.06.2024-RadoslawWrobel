@@ -34,95 +34,54 @@ class Main {
                     case 1: exercise1(); break;
                     case 2: exercise2(); break;
                     case 3: exercise3(); break;
-                    default: return;
+                    case 0: return;
+                    default: System.out.println("Ups! Wprowadzono złą operację!");
                 }
             } catch(IOException e) {
-
-            } catch(WrongStudentName e) 
-                {
-                System.out.println("Błędne imie studenta!");
-            } catch(WrongAge e) 
-                {
+                System.out.println("Wystąpił błąd wejścia/wyjścia.");
+            } catch(WrongStudentName e) {
+                System.out.println("Błędne imię studenta!");
+            } catch(WrongAge e) {
                 System.out.println("Błędny wiek!");
-            } catch(WrongDateOfBirth e) 
-                {
+            } catch(WrongDateOfBirth e) {
                 System.out.println("Błędna data urodzenia!");
-            } catch(WrongDateFormat e) 
-                {
-                System.out.println("Błędny format daty! Sprawdź czy na pewno dzień zawiera się w 1-31, miesiąc w 1-12, rok w 1900-2024");
+            } catch(WrongDateFormat e) {
+                System.out.println("Błędny format daty! Sprawdź czy na pewno dzień zawiera się w 1-31, miesiąc w 1-12, rok w 1900-2024.");
+            } catch(NumberFormatException e) {
+                System.out.println("Ups! Wprowadzono złą operację!");
             }
         }
     }
 
-    public static int menu() {
+    public static int menu() throws NumberFormatException {
         System.out.println("Wciśnij:");
         System.out.println("1 - aby dodać studenta");
         System.out.println("2 - aby wypisać wszystkich studentów");
         System.out.println("3 - aby wyszukać studenta po imieniu");
         System.out.println("0 - aby wyjść z programu");
-        return scan.nextInt();
+        String input = scan.nextLine();
+        try {
+            return Integer.parseInt(input);
+        } catch (NumberFormatException e) {
+            throw new NumberFormatException();
+        }
     }
 
     public static String ReadName() throws WrongStudentName {
-        scan.nextLine();
-        System.out.println("Podaj imie: ");
+        System.out.println("Podaj imię: ");
         String name = scan.nextLine();
-        if(name.contains(" "))
+        if(name.contains(" ")) {
             throw new WrongStudentName();
-
+        }
         return name;
     }
+
     public static String ReadDate() throws WrongDateOfBirth, WrongDateFormat {
-        scan.nextLine();
-        System.out.println("Podaj datę urodzenia DD-MM-YYY");
-        var date = scan.nextLine();
+        System.out.println("Podaj datę urodzenia DD-MM-YYYY:");
+        String date = scan.nextLine();
         if (!date.matches("\\d{2}-\\d{2}-\\d{4}")) {
             throw new WrongDateOfBirth();
         }
-        String[] parts = date.split("-");
-        int day = Integer.parseInt(parts[0]);
-        int month = Integer.parseInt(parts[1]);
-        int year = Integer.parseInt(parts[2]);
-
-        // Sprawdzenie poprawności roku
-        if (year < 1900 || year > 2024) {
-            throw new WrongDateFormat();
-        }
-
-        // Sprawdzenie poprawności miesiąca
-        if (month < 1 || month > 12) {
-            throw new WrongDateFormat();
-        }
-
-        // Sprawdzenie poprawności dnia w zależności od miesiąca
-        if (day < 1 || day > 31) {
-            throw new WrongDateFormat();
-        }
-        if (month == 2 && day > 29) {
-            throw new WrongDateFormat();
-        }
-        if ((month == 4 || month == 6 || month == 9 || month == 11) && day > 30) {
-            throw new WrongDateFormat();
-        }
-
-        return date;
-    }
-    public static int ReadAge() throws WrongAge {
-        System.out.println("Podaj wiek: ");
-        var age = scan.nextInt();
-        if (age < 0 || age > 100)
-            throw new WrongAge();
-        return age;
-    }
-
-    public static String SprawdzDate() throws WrongDateOfBirth, WrongDateFormat {
-        scan.nextLine();
-        System.out.println("Podaj datę urodzenia DD-MM-YYY");
-        var date = scan.nextLine();
-        if (!date.matches("\\d{2}-\\d{2}-\\d{4}")) {
-            throw new WrongDateOfBirth();
-        }
-
         String[] parts = date.split("-");
         int day = Integer.parseInt(parts[0]);
         int month = Integer.parseInt(parts[1]);
@@ -131,33 +90,48 @@ class Main {
         if (year < 1900 || year > 2024 || month < 1 || month > 12 || day < 1 || day > 31) {
             throw new WrongDateFormat();
         }
+        if (month == 2 && day > 29) {
+            throw new WrongDateFormat();
+        }
+        if ((month == 4 || month == 6 || month == 9 || month == 11) && day > 30) {
+            throw new WrongDateFormat();
+        }
         return date;
     }
 
+    public static int ReadAge() throws WrongAge {
+        System.out.println("Podaj wiek: ");
+        int age = scan.nextInt();
+        scan.nextLine(); // consume the newline character
+        if (age < 0 || age > 100) {
+            throw new WrongAge();
+        }
+        return age;
+    }
+
     public static void exercise1() throws IOException, WrongStudentName, WrongAge, WrongDateOfBirth, WrongDateFormat {
-        var name = ReadName();
-        var age = ReadAge();
-        var date = SprawdzDate();
+        String name = ReadName();
+        int age = ReadAge();
+        String date = ReadDate();
         (new Service()).addStudent(new Student(name, age, date));
     }
 
     public static void exercise2() throws IOException {
         var students = (new Service()).getStudents();
         for(Student current : students) {
-            System.out.println(current.ToString());
+            System.out.println(current.toString());
         }
     }
 
     public static void exercise3() throws IOException {
-        scan.nextLine();
-        System.out.println("Podaj imie: ");
-        var name = scan.nextLine();
+        System.out.println("Podaj imię: ");
+        String name = scan.nextLine();
         var wanted = (new Service()).findStudentByName(name);
-        if(wanted == null)
+        if(wanted == null) {
             System.out.println("Nie znaleziono...");
-        else {
+        } else {
             System.out.println("Znaleziono: ");
-            System.out.println(wanted.ToString());
+            System.out.println(wanted.toString());
         }
     }
 }
